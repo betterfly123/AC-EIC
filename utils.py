@@ -146,7 +146,7 @@ def role_testDataset():
 
 def get_features(train=True):
 
-    with open('./Datasets/MELD/feature/char_features_2.txt', 'r', encoding='utf-8') as f:
+    with open('./Datasets/MELD/feature/char_features.txt', 'r', encoding='utf-8') as f:
         sen_data = f.read()
     sentiment_list = sen_data.split('\n')
     sentiment_list = sentiment_list[1:]
@@ -195,7 +195,7 @@ def find_feature(listener, feature, tokenizer):
 
 
 def get_tab_text_feature(train=True):
-    file = open("./Datasets/MELD/feature/tabText/AllFeature2.CSV", 'rb')
+    file = open("./Datasets/MELD/feature/AllFeature.CSV", 'rb')
     df = pd.read_csv(file)
     data = np.array(df)
     number = np.shape(data)[0]
@@ -262,9 +262,9 @@ def find_tab_text_feature(listener, feature, tokenizer, k):
 
 def cicero_get(tokenizer, train=True):
     if train==True:
-        file_path = './Datasets/CICERO/CICERO.csv'
+        file_path = './Datasets/CICERO/CICERO_MELD_train.csv'
     else:
-        file_path = './Datasets/CICERO/CICERO_test.csv'
+        file_path = './Datasets/CICERO/CICERO_MELD_test.csv'
     data = pd.read_csv(file_path, names=['knowledge'])
     knowledge_list = []
     for i in range(data.shape[0]):
@@ -397,7 +397,7 @@ def cicero_em_get(tokenizer, train=True):
     return k
 
 def get_tab_text_feature_emr(train=True):
-    file = open("./Datasets/MELD/feature/tabText/AllFeature2.CSV", 'rb')
+    file = open("./Datasets/EmoryNLP/feature/AllFeature.CSV", 'rb')
     df = pd.read_csv(file)
     data = np.array(df)
     number = np.shape(data)[0]
@@ -548,9 +548,9 @@ class CPEDRobertaDataset:
 
 def cicero_get_cped(tokenizer, label):
     if label == 'train':
-        file = open("./Datasets/CPED/data/train.csv", encoding='ISO-8859-1')
+        file = open("./Datasets/CPED/train.csv", encoding='ISO-8859-1')
     else:
-        file = open("./Datasets/CPED/data/test.csv", encoding='ISO-8859-1')
+        file = open("./Datasets/CPED/test.csv", encoding='ISO-8859-1')
     df = pd.read_csv(file)
     dialog_id = []
     id = df.iloc[0]['Dialogue_ID']
@@ -611,7 +611,7 @@ def get_proper_loaders_cped(trainset, testset, batch_size=32,  num_workers=0, pi
     return train_loader, None, test_loader
 
 def get_tab_text_feature_cped():
-    file = open("./Datasets/CPED/data/feature.CSV", encoding='ISO-8859-1')
+    file = open("./Datasets/CPED/feature/feature.CSV", encoding='ISO-8859-1')
     df = pd.read_csv(file)
     data = np.array(df)
     number = np.shape(data)[0]
