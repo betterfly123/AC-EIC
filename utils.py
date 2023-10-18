@@ -17,31 +17,6 @@ id2label = {7974: 0, 2755: 1, 2490: 2, 17437: 3, 5823: 4, 30883: 5, 6378: 6}
 emotion2label = {'neutral': 0, 'surprise': 1, 'fear': 2, 'sadness': 3, 'joy': 4, 'disgust': 5, 'anger': 6}
 label2emotion = {}
 
-e0 = ['neutral']
-e0_token = ['7974']
-e1 = ['surprise', 'curiosity', 'excitement', 'wonder', 'awe']
-e1_token = [2755, 3911, 14685, 32775, 38117, 20610, 8354, 2283, 5170, 15133, 21531, 32211]
-e2 = ['anxiety', 'panic', 'fear', 'worry', 'nervous']
-e2_token = [6882, 42027, 46067, 40493, 9810, 18019, 2490, 39231, 4022, 7464]
-e3 = ['sadness', 'disappointment', 'pain', 'loneliness']
-e3_token = [17437, 10208, 2400, 23689, 32981, 43889, 24792]
-e4 = ['happiness', 'joy', 'excitement', 'happy']
-e4_token = [37842, 11098, 5823, 11351, 20768, 37252, 8354, 9899, 1372]
-e5 = ['disgust', 'dissatisfaction']
-e5_token = [30883, 31776]
-e6 = ['angry', 'anger', 'resentment', 'rage', 'hostility', 'jealousy']
-e6_token = [5800, 6378, 27111, 14706, 22069, 37146]
-label_token = [e0_token, e1_token, e2_token, e3_token, e4_token, e5_token, e6_token]
-
-
-def label_count(pred):
-    for i in range(len(label_token)):
-        tmp = label_token[i]
-        for j in range(len(tmp)):
-            if pred == tmp[j]:
-                return i
-    return 0
-
 for key in emotion2label.keys():
     label2emotion[emotion2label[key]] = key
 label2id = {emotionids[i]: i for i in range(len(emotionids))}
@@ -210,10 +185,7 @@ def find_feature(listener, feature, tokenizer):
         listener_feature = feature[listener]
     else:
         listener_feature = common_feature_presets
-    # print(listener_feature)
     cur_feature = tokenizer(listener_feature, return_tensors="pt")['input_ids']
-    # print(cur_feature)
-    # print("cur_feature:", cur_feature.shape)
     cur_feature = cur_feature.view(-1)
     cur_feature = cur_feature.numpy().tolist()
     while len(cur_feature) <= 500:
@@ -288,31 +260,6 @@ def find_tab_text_feature(listener, feature, tokenizer, k):
     return cur_feature
 
 
-def knowledge_select(U, cur_com):
-    liner_cover_u = nn.Linear(1024, 768).cuda()
-    cos_sum = torch.zeros(7)
-    for j in range(9):
-        # print("s_id:", j, "cur_comet_len:", len(cur_com[j][i]))
-        cos_com = torch.Tensor(cur_com[j]).cuda()
-        cos_u = liner_cover_u(U).cuda()
-        # print("cos_u_shape:", cos_u.shape)
-        # print("cos_com_shape:", cos_com.shape)
-        if j == 0:
-            cos_sim = F.cosine_similarity(cos_u, cos_com, dim=1)
-            cos_sum = cos_sim.unsqueeze(0)
-            # print("000cos_sum_shape:", cos_sum.shape)
-        else:
-            cos_sim = F.cosine_similarity(cos_u, cos_com, dim=1).unsqueeze(0)
-            cos_sum = torch.cat((cos_sim, cos_sum), dim=0)
-            # print("cos_sum_shape:", cos_sum.shape)
-    cos_sum = cos_sum.unsqueeze(-1)
-    # print("cur_com_shape:", cur_com.device)
-    # print("cos_sum_shape:", cos_sum.device)
-    cur_com = cos_sum.cuda() * cur_com.cuda()
-    # print("s_cur_com_shape:", cur_com.shape)
-    return cur_com
-
-
 def cicero_get(tokenizer, train=True):
     if train==True:
         file_path = './Datasets/CICERO/CICERO.csv'
@@ -342,119 +289,19 @@ def cur_info(conv, speaker):
     return cur_intra_cause_effect_mask, cur_inter_cause_effect_mask
 
 
-def padding(tmp, length):
-    while(len(tmp)<length):
-        tmp.append(0)
-    if len(tmp) > 1024:
-        tmp = tmp[:1024]
-    tmp = torch.tensor(tmp)
-    return tmp
-
-def select_feature(utt, feature, role, tokenizer):
-    listener_feature = [0] * 1024
-    cur_feature = torch.tensor(listener_feature)
-    if role in feature:
-        tmp = feature[role]
-        cos_max = -2
-        for i in range(len(tmp)):
-            feature_tmp = tokenizer(tmp[i], return_tensors="pt")['input_ids'][0]
-            new_feature = padding(feature_tmp.tolist(), 1024)
-            cos_sim = F.cosine_similarity(utt, new_feature, dim=0)
-            if cos_sim > cos_max:
-                cur_feature = new_feature
-    return cur_feature
-
-def padding2(tmp, length):
-    while(len(tmp)<length):
-        tmp.append(0)
-    if len(tmp) > 1024:
-        tmp = tmp[:1024]
-    tmp = torch.tensor(tmp)
-    return tmp
-
-def select_feature2(utt, feature, role, tokenizer):
-    listener_feature = [0] * 1024
-    cur_feature = torch.tensor(listener_feature)
-    if role in feature:
-        tmp = feature[role]
-        dict_sum = {}
-        for i in range(len(tmp)):
-            feature_tmp = tokenizer(tmp[i], return_tensors="pt")['input_ids'][0]
-            new_feature = padding(feature_tmp.tolist(), 1024)
-            cos_sim = F.cosine_similarity(utt, new_feature, dim=0)
-            cos_sim = cos_sim.double()
-            dict_sum[cos_sim.tolist()] = tmp[i]
-        new_dict = sorted(dict_sum.items(), key=lambda x: x[0])
-        role_f = new_dict[0][1]
-        for j in range(1, len(new_dict)):
-            t_role = role_f + new_dict[j][1]
-            feature_tmp = tokenizer(t_role, return_tensors="pt")['input_ids'][0]
-            if feature_tmp.shape[0] > 1024:
-                break
-            role_f = role_f + new_dict[j][1]
-        feature_tmp = tokenizer(role_f, return_tensors="pt")['input_ids'][0]
-        cur_feature = padding(feature_tmp.tolist(), 1024)
-    return cur_feature
-
-def select_feature3(utt, feature, role, tokenizer):
-    listener_feature = 'passby: This is a passerby, not the main character, with a relatively single, fixed, and flat personality.'
-    common_feature = tokenizer(listener_feature, return_tensors="pt", max_length=315, padding='max_length')['input_ids'][0]
-    cur_feature = common_feature
-    if role in feature:
-        tmp = feature[role]
-        cos_max = -2
-        for i in range(len(tmp)):
-            new_feature = tokenizer(tmp[i], return_tensors="pt", max_length=1024, padding='max_length')['input_ids'][0]
-            cos_sim = F.cosine_similarity(utt, new_feature, dim=0)
-            new_feature = tokenizer(tmp[i], return_tensors="pt", max_length=315, padding='max_length')['input_ids'][0]
-            if cos_sim > cos_max:
-                cur_feature = new_feature
-    return cur_feature
-
-
 def get_common_ground(id, U, comet, role, feature, tokenizer):
     cm_list = []
     cur_speaker = role[id + 1]
     for i in range(id+1):
         utt = U[0][i].cpu()
         if cur_speaker == role[i]:
-            # knowledgew = comet[8, i, :].reshape(1 * 768)
-            knowledger = comet[7, i, :].reshape(1 * 768)
-            # knowledgee = comet[4, i, :].reshape(1 * 768)
+            knowledgew = comet[8, i, :].reshape(1 * 768)
         else:
-            # knowledgew = comet[2, i, :].reshape(1 * 768)
-            knowledger = comet[1, i, :].reshape(1 * 768)
-            # knowledgee = comet[0, i, :].reshape(1 * 768)
-        # rolef = select_feature(utt, feature, role[i], tokenizer)
-        # cm = torch.cat((knowledgew, knowledgee), 0)
-        # cm = torch.cat((cm, knowledger), 0)
-        # cm = torch.cat((utt, cm), 0)
-        cm = torch.cat((utt, knowledger), 0)
-        # cm = torch.cat((utt, rolef), 0)
+            knowledgew = comet[2, i, :].reshape(1 * 768)
+
+        cm = torch.cat((utt, knowledgew), 0)
         cm_list.append(cm.cuda())
     return cm_list
-
-# def get_common_ground2(id, U, cicero_id, cicero, role, feature, tokenizer):
-#     cm_list = []
-#     cicero_id = cicero_id - id + 1
-#     for i in range(id+1):
-#         utt = U[0][i].cpu()
-#         rolef = select_feature3(utt, feature, role[i], tokenizer)
-#         cm = torch.cat((utt, rolef), 0)
-#         cm_list.append(cm.cuda())
-#     return cm_list
-
-# def get_common_ground(id, U, comet, role, feature, tokenizer):
-#     cm_list = []
-#     cur_speaker = role[id + 1]
-#     for i in range(id+1):
-#         utt = U[0][i].cpu()
-#         knowledgei = comet[2, i, :].reshape(1 * 768)
-#         knowledger = comet[8, i, :].reshape(1 * 768)
-#         cm = torch.cat((knowledger, utt), 0)
-#         cm = torch.cat((cm, knowledgei), 0)
-#         cm_list.append(cm.cuda())
-#     return cm_list
 
 
 # emorynlp
@@ -610,8 +457,6 @@ def role_em(tokenizer, label):
     cicero = [[[[] for k in range(number2 + 1)] for j in range(number1 + 2)] for i in range(number0 + 1)]
     for i in range(data.shape[0]):
         all_role[data[i][5]][data[i][6]][data[i][3]].append(data[i][1])
-        # print(data[i][5],data[i][6],data[i][3])
-        # print(len(cicero[data[i][5]][data[i][6]][data[i][3]]))
         cicero[data[i][5]][data[i][6]][data[i][3]].append(k[i])
 
     return all_role, cicero

@@ -4,7 +4,7 @@ import torch.nn as nn
 from transformers.modeling_outputs import MaskedLMOutput
 from transformers import RobertaTokenizer, RobertaForMaskedLM, TrainingArguments,  BertForMaskedLM
 
-
+# meld PCGEI
 class CMPromptFIX(RobertaForMaskedLM):
 
     def __init__(self, config, u_dim=1024, l_dim=9, f_dim=1024, ple=3, plp=3, pre=3, prp=3, dropout=0.1):
@@ -163,7 +163,7 @@ class CMPromptFIX(RobertaForMaskedLM):
         loss = mlm_out.loss
         return self.smx(logit), loss, mlm_out.logits
 
-# emorynlp cm
+# emorynlp PCGEI
 class EmCMPromptFIX(RobertaForMaskedLM):
 
     def __init__(self, config, u_dim=1024, l_dim=9, f_dim=1024, ple=3, plp=3, pre=3, prp=3, dropout=0.1):
@@ -367,7 +367,6 @@ class CpedCMPromptFIX(RobertaForMaskedLM):
         self.linee = nn.Linear(1024, self.dim * (self.ple + self.pre))
         self.linep = nn.Linear(1024, self.dim * (self.plp + self.prp))
         self.global_c = nn.Linear(512, 1024)
-        # self.common_g = nn.Linear(3328, 1024)
         self.common_g = nn.Linear(1792, 1024)
         self.gelu = nn.GELU()
         self.smx = nn.Softmax(dim=1)

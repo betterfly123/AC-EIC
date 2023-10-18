@@ -73,7 +73,7 @@ def train_or_eval_cm(epoch, feature, label2emotion, label2id, dataset, role, cic
                     preds.append(label2id[pred] if pred in label2id.keys() else 0)
             optimizer.step()
             optimizer.zero_grad()
-        model.save_pretrained("./want_l2_15_model_" + str(epoch))
+        model.save_pretrained("./meld" + str(epoch))
         results.append(precision_recall_fscore_support(ground_truth, preds))
         print(f"epoch: {epoch} loss: {loss}")
         _, _, f1_score, _ = precision_recall_fscore_support(ground_truth, preds)
@@ -180,8 +180,6 @@ def cm_prompt_feature_TP(path, label2emotion, label2id, ple, plp, pre, prp, epoc
         if not best_fscore or f_score > best_fscore:
             best_fscore = f_score
             best_epoch = e
-        for i in range(len(fscore_list)):
-            print("epoch:", i, "f_score:", fscore_list[i])
     print("best_epoch is :", best_epoch)
     print("best_fscore is :", best_fscore)
 
@@ -192,7 +190,5 @@ torch.cuda.set_device(0)
 path = './Datasets/MELD/meld_features_roberta.pkl'
 emo_path = './Datasets/emorynlp/emorynlp_features_roberta.pkl'
 
-
-# cm
 
 cm_prompt_feature_TP(path, label2emotion, id2label, ple=3, plp=3, pre=3, prp=3, epoch=60, batch_size=32, lr=5e-6, l2=1e-2)
