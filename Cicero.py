@@ -11,10 +11,6 @@ tokenizer = AutoTokenizer.from_pretrained("./cheakpoint")
 model = AutoModelForSeq2SeqLM.from_pretrained("./cheakpoint")
 model.cuda()
 
-# relation = ['What is the possible emotional reaction of the listener in response to target? <sep> target: ',
-#             'What is or could be the cause of target? <sep> target: ',
-#             'What subsequent event happens or could happen following the target? <sep> target: ',
-#             'What is or could be the motivation of target? <sep> target: ']
 relation = ['What is the possible emotional reaction of the listener in response to target? <sep> target: ']
 sep = ' <sep> context: '
 utt = ', <utt> '
