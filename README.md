@@ -21,6 +21,21 @@
 | Val   |  370  |    13    |   517   |       792      |  3,126  |  1,608 |   274   |  117  |  1,446  |   198   |     313    |   661   |      1,702     | 11,138 |
 | Test  | 2,604 |    31    |  2,150  |      1,685     |  7,991  |  3,031 |   530   |  872  |  2,792  |   435   |    1,433   |  1,489  |      2,395     | 27,439 |
 
+# Instruction Example
+1.
+instruction: Complete the emotion inference task by predicting the emotion of the next utterance using the given conversation history, the emotion can only be chosen from [happy, grateful, relaxed, positive-other, neutral, anger, sadness, fear, depress, disgust, astonished, worried, negative-other], note that the emotion of the next utterance is unknown.
+
+input: What a coincidence The car is all right It's you. It's okay. It's okay. Thank you
+
+output: neutral
+
+2.
+instruction: Complete the emotion inference task by predicting the emotion of the next utterance using the given conversation history, the emotion can only be chosen from [neutral, surprise, fear, sadness, joy, disgust, anger], note that the emotion of the next utterance is unknown.
+
+input: I'm supposed to attach a brackety thing to the side things, using a bunch of these little worm guys. I have no brackety thing, I see no whim guys whatsoever and- I cannot feel my legs. I'm thinking we've got a bookcase here. It's a beautiful thing. What's this? Which goes where? I have no idea. Done with the bookcase! All finished! This was Carol's favorite beer. She always drank it out of the can, I should have known. Yes, please don't spoil all this fun. You guys. Oh, God. You got screwed.
+
+output: Mad
+
 # Case Study
 
 |                                                                                |                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
