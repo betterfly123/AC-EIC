@@ -62,7 +62,6 @@ pip install -r requirements.txt
 
 ### Quick Start
 
-If you have a script entrypoint (recommended):
 
 ```bash
 bash run.sh
