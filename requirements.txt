@@ -1,0 +1,5 @@
+numpy 1.22.3
+pandas 1.4.4
+transformers 4.18.0
+scikit-learn-1.1.2
+conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
